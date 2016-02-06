@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <sys/time.h>
+#include <sys/types.h>
 
 #include "argv.h"
 
@@ -20,26 +21,15 @@ struct process
 
 	struct argv argv;
 
-  enum state
-	{
-		state_run,
-		state_sleep,
-		state_disk,
-		state_stopped,
-		state_zombie,
-		state_dead,
-		state_trace,
-		state_other,
-		state_COUNT
-	} state;
+	char state;
 
   signed char nice;
 };
 
-bool process_init_read(struct process *, pid_t);
-void process_free(struct process *);
+const char *process_init_read(struct process *, pid_t);
+void process_free(struct process *); /* doesn't release argument, just contents */
 
 /* returns false on death */
-bool process_try_update(struct process *);
+bool process_try_update(struct process *, const char **err);
 
 #endif
