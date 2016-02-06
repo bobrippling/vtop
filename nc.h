@@ -11,6 +11,8 @@ int nc_getch_timeout(double timeout_secs);
 #define NC_GETCH_TIMEOUT -3
 
 void nc_move(point);
+point nc_get_screensz(void);
+
 void nc_printf(const char *, ...);
 void nc_vprintf(const char *, va_list);
 

@@ -67,6 +67,13 @@ void nc_move(point pt)
 	move(pt.y, pt.x);
 }
 
+point nc_get_screensz(void)
+{
+	point pt;
+	getmaxyx(stdscr, pt.y, pt.x);
+	return pt;
+}
+
 void nc_printf(const char *fmt, ...)
 {
 	va_list l;

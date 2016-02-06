@@ -24,7 +24,9 @@ static void handle_input(int ch, ui *ui)
 
 static void maybe_redraw(ui *ui)
 {
-	for(size_t i = 0; ; i++){
+	point max = nc_get_screensz();
+
+	for(size_t i = 0; i < (unsigned)max.y; i++){
 		struct process *p = ps_get_index(ui->ps, i);
 		if(!p)
 			break;
