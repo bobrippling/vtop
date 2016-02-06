@@ -1,0 +1,68 @@
+#!/bin/sh
+
+try_cflag(){
+	flag="$1"
+	target="$2"
+	if test -z "$target"
+	then target='CFLAGS_CONFIGURE'
+	fi
+
+	printf 'checking whether compiler accepts %s... ' "$flag"
+	echo "typedef int abc;" >"$ctmp"
+
+	if $CC "$flag" -c -o /dev/null "$ctmp" >/dev/null 2>&1
+	then
+		echo yes
+		echo "$target += $flag" >> Makefile.cfg
+		return 0
+	else
+		echo no
+		return 1
+	fi
+}
+
+if [ $# -ne 0 ]
+then
+	echo "Usage: $0" >&2
+	echo "Pass CC, CFLAGS and LDFLAGS via the environment" >&2
+	echo "e.g. CFLAGS=-O3 ./configure" >&2
+	exit 1
+fi
+
+if [ -z "$TMPDIR" ]
+then
+	TMPDIR=tmp/
+	mkdir -p "$TMPDIR" || exit $?
+	trap "rm -r '$TMPDIR'" EXIT
+fi
+
+if [ -z "$CC" ]
+then
+	CC=cc
+fi
+
+vtoptmpdir="${TMPDIR}"/vtop.$$
+mkdir "$vtoptmpdir" || { echo "couldn't make temporary directory" >&2; exit 1; }
+trap "rm -rf '$vtoptmpdir'" EXIT
+
+ctmp="$vtoptmpdir/1.c"
+
+echo > Makefile.cfg
+
+echo "CC = $CC" >> Makefile.cfg
+echo "CFLAGS_CONFIGURE = $CFLAGS" >> Makefile.cfg
+echo "LDFLAGS_CONFIGURE = $LDFLAGS" >> Makefile.cfg
+
+try_cflag -Wall
+try_cflag -Wextra
+try_cflag -Wmissing-prototypes
+try_cflag -Wmissing-declarations
+
+try_cflag -Werror=incompatible-pointer-types
+
+try_cflag -Wno-missing-field-initializers
+try_cflag -Wno-missing-braces
+try_cflag -Wno-pointer-to-int-cast
+
+try_cflag -g
+try_cflag -g LDFLAGS_CONFIGURE

@@ -1,2 +1,4 @@
 *.o
 vtop
+Makefile.cfg
+.*.d
