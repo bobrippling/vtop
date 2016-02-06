@@ -1,4 +1,4 @@
-SRC = main.c nc.c ui.c ps.c
+SRC = main.c mem.c nc.c ps.c ui.c proc.c argv.c io.c
 OBJ = ${SRC:.c=.o}
 DEPS = ${SRC:%.o=.%.d}
 
