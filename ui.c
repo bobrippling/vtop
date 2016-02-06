@@ -25,13 +25,16 @@ static void handle_input(int ch, ui *ui)
 static void maybe_redraw(ui *ui)
 {
 	point max = nc_get_screensz();
+	int y = 0;
 
-	for(size_t i = 0; i < (unsigned)max.y; i++){
+	for(size_t i = 0; y < max.y; i++){
 		struct process *p = ps_get_index(ui->ps, i);
 		if(!p)
 			break;
+		if(process_is_kernel(p))
+			continue;
 
-		nc_move((point){ .y = i });
+		nc_move((point){ .y = y++ });
 
 		char **argv = p->argv.argv;
 

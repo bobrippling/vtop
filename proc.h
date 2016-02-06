@@ -32,4 +32,6 @@ void process_free(struct process *); /* doesn't release argument, just contents 
 /* returns false on death */
 bool process_try_update(struct process *, const char **err);
 
+#define process_is_kernel(p) ((p)->ppid == 0 || (p)->ppid == 2)
+
 #endif
