@@ -42,20 +42,7 @@ void nc_init(void)
 
 void nc_term(void)
 {
-	static bool done = false;
-
-	if(done){
-		refresh();
-		return;
-	}
-
-	done = true;
-
-	initscr();
-	noecho();
-	cbreak();
-	raw();
-	nonl();
+	endwin();
 }
 
 int nc_getch_timeout(double timeout)
@@ -75,3 +62,20 @@ int nc_getch_timeout(double timeout)
 	return ch;
 }
 
+void nc_move(point pt)
+{
+	move(pt.y, pt.x);
+}
+
+void nc_printf(const char *fmt, ...)
+{
+	va_list l;
+	va_start(l, fmt);
+	nc_vprintf(fmt, l);
+	va_end(l);
+}
+
+void nc_vprintf(const char *fmt, va_list l)
+{
+	vw_printw(stdscr, fmt, l);
+}
