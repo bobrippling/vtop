@@ -1,51 +1,78 @@
+#include <time.h>
 #include <sys/time.h>
 
 #include "ui.h"
 
 #include "nc.h"
 #include "ps.h"
+#include "proc.h"
 
 #include "config.h"
 
 typedef struct {
 	ps *ps;
 	time_t last_redraw, last_ps_update;
+	int exit_code; /* if >= 0, exit */
 } ui;
 
-static void handle_input(int ch, ui *ui, int *const ec)
+static void handle_input(int ch, ui *ui)
 {
+	if(ch == 'q'){
+		ui->exit_code = 0;
+	}
 }
 
 static void maybe_redraw(ui *ui)
 {
+	for(size_t i = 0; ; i++){
+		struct process *p = ps_get_index(ui->ps, i);
+		if(!p)
+			break;
+
+		nc_move((point){ .y = i });
+
+		char **argv = p->argv.argv;
+
+		nc_printf("%ld %s", p->pid, argv ? argv[0] : "?");
+	}
 }
 
 static void maybe_update_ps(ui *ui)
 {
+	time_t now = time(NULL);
+
+	if(ui->last_ps_update + 1 < now){
+		ui->last_ps_update = now;
+
+		ps_update(ui->ps);
+	}
 }
 
-static int ui_main_1(ui *ui, int *const ec)
+static void ui_main_1(ui *ui)
 {
-	int ch = nc_getch_timeout(CONFIG_KEY_TIMEOUT_SECONDS);
-
-	if(ch != NC_GETCH_TIMEOUT)
-		handle_input(ch, ui, ec);
-
 	maybe_update_ps(ui);
 	maybe_redraw(ui);
+
+	int ch = nc_getch_timeout(CONFIG_KEY_TIMEOUT_SECONDS);
+	if(ch != NC_GETCH_TIMEOUT)
+		handle_input(ch, ui);
 }
 
 int ui_main(void)
 {
-	ui ui = { .ps = ps_new() };
+	ui ui = { .ps = ps_new(), .exit_code = -1 };
 
-	ui.last_redraw = ui.last_ps_update = time(NULL);
+	ui.last_redraw = ui.last_ps_update = time(NULL) - 2;
 
-	while(ui_main_1(&ui, &ec));
+	for(;;){
+		ui_main_1(&ui);
+		if(ui.exit_code >= 0)
+			break;
+	}
 
 	ps_free(ui.ps);
 
-	return ec;
+	return ui.exit_code;
 }
 
 void ui_init(void)
