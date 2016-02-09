@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>
+#include <string.h>
 
 #include "ps.h"
 
@@ -72,13 +73,37 @@ static const char *ps_update_proc_1(ps *ps, pid_t pid)
 	return NULL;
 }
 
+static void trim_processes(ps *ps, bool *const currents, size_t orig_nprocs)
+{
+	size_t current_idx = 0;
+
+	for(size_t i = 0; i < orig_nprocs; ){
+		if(currents[current_idx++]){
+			i++;
+			continue;
+		}
+
+		process_free(&ps->procs[i]);
+
+		for(size_t j = i; j < ps->nprocs - 1; j++)
+			ps->procs[j] = ps->procs[j + 1];
+
+		ps->nprocs--;
+		orig_nprocs--;
+	}
+}
+
 static const char *ps_update_proc(ps *ps)
 {
-	const char *ret = NULL;
+	const size_t orig_nprocs = ps->nprocs;
+	bool *currents = xmalloc(orig_nprocs * sizeof(*currents));
+	memset(currents, 0, orig_nprocs * sizeof(*currents));
+
 	DIR *d = opendir("/proc");
 	if(!d)
 		return "can't open procfs";
 
+	const char *ret = NULL;
 	struct dirent *ent;
 	while((errno = 0, ent = readdir(d))){
 		char *end;
@@ -88,11 +113,15 @@ static const char *ps_update_proc(ps *ps)
 			continue;
 
 		pid_t pid = (pid_t)lpid;
+		size_t idx;
 
-		if(ps_get_pid(ps, pid))
+		if(ps_get_pid(ps, pid, &idx)){
+			currents[idx] = true;
+
 			ret = ps_update_proc_1(ps, pid);
-		else
+		}else{
 			ret = ps_new_proc_1(ps, pid);
+		}
 
 		if(ret)
 			goto ret;
@@ -105,6 +134,10 @@ static const char *ps_update_proc(ps *ps)
 ret:;
 	int save = errno;
 	closedir(d);
+
+	trim_processes(ps, currents, orig_nprocs);
+	free(currents);
+
 	errno = save;
 	return ret;
 }
@@ -118,11 +151,14 @@ const char *ps_update(ps *ps)
 	return ps_update_proc(ps);
 }
 
-struct process *ps_get_pid(ps *ps, pid_t pid)
+struct process *ps_get_pid(ps *ps, pid_t pid, size_t *const idx)
 {
-	for(size_t i = 0; i < ps->nprocs; i++)
-		if(ps->procs[i].pid == pid)
+	for(size_t i = 0; i < ps->nprocs; i++){
+		if(ps->procs[i].pid == pid){
+			*idx = i;
 			return &ps->procs[i];
+		}
+	}
 
 	return NULL;
 }
