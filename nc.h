@@ -16,4 +16,7 @@ point nc_get_screensz(void);
 void nc_printf(const char *, ...);
 void nc_vprintf(const char *, va_list);
 
+void nc_clrtoeol(void);
+void nc_clrtobot(void);
+
 #endif

@@ -40,6 +40,9 @@ static void maybe_redraw(ui *ui)
 
 		nc_printf("%ld %s", p->pid, argv ? argv[0] : "?");
 	}
+
+	nc_move((point){ .y = y });
+	nc_clrtobot();
 }
 
 static void maybe_update_ps(ui *ui)

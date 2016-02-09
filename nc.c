@@ -86,3 +86,13 @@ void nc_vprintf(const char *fmt, va_list l)
 {
 	vw_printw(stdscr, fmt, l);
 }
+
+void nc_clrtoeol(void)
+{
+	clrtoeol();
+}
+
+void nc_clrtobot(void)
+{
+	clrtobot();
+}
