@@ -12,6 +12,7 @@
 typedef struct {
 	ps *ps;
 	time_t last_redraw, last_ps_update;
+	const char *last_ps_err;
 	int exit_code; /* if >= 0, exit */
 } ui;
 
@@ -27,7 +28,7 @@ static void maybe_redraw(ui *ui)
 	point max = nc_get_screensz();
 	int y = 0;
 
-	for(size_t i = 0; y < max.y; i++){
+	for(size_t i = 0; y < max.y - 1; i++){
 		struct process *p = ps_get_index(ui->ps, i);
 		if(!p)
 			break;
@@ -43,6 +44,12 @@ static void maybe_redraw(ui *ui)
 
 	nc_move((point){ .y = y });
 	nc_clrtobot();
+
+	const char *msg = ui->last_ps_err;
+	if(msg){
+		nc_move((point){ .y = max.y - 1 });
+		nc_printf("%s", msg);
+	}
 }
 
 static void maybe_update_ps(ui *ui)
@@ -52,7 +59,7 @@ static void maybe_update_ps(ui *ui)
 	if(ui->last_ps_update + 1 < now){
 		ui->last_ps_update = now;
 
-		ps_update(ui->ps);
+		ui->last_ps_err = ps_update(ui->ps);
 	}
 }
 
