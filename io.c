@@ -7,13 +7,13 @@
 
 #include "mem.h"
 
-char *io_readall(const char *path)
+char *io_readline(const char *path)
 {
 	size_t len = 0;
-	return io_readall_nul(path, &len);
+	return io_readline_nul(path, &len);
 }
 
-char *io_readall_nul(const char *path, size_t *const plen)
+char *io_readline_nul(const char *path, size_t *const plen)
 {
 	FILE *f = fopen(path, "r");
 

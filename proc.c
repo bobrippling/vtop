@@ -13,7 +13,7 @@ static void process_read_argv_from_stat(struct process *p)
 	char proc_path[64];
 	snprintf(proc_path, sizeof(proc_path), "/proc/%lu/stat", (long)p->pid);
 
-	char *stat_line = io_readall(proc_path);
+	char *stat_line = io_readline(proc_path);
 
 	if(!stat_line)
 		return;
@@ -46,7 +46,7 @@ static void process_read_argv(struct process *p)
 	snprintf(path, sizeof path, "/proc/%d/cmdline", p->pid);
 
 	size_t cmdlen = 0;
-	char *cmd = io_readall_nul(path, &cmdlen);
+	char *cmd = io_readline_nul(path, &cmdlen);
 
 	if(cmd && cmdlen){
 		argv_from_nulterminated(&p->argv, cmd, cmdlen);
@@ -65,7 +65,7 @@ const char *process_init_read(struct process *p, pid_t pid)
 	char proc_path[64];
 	snprintf(proc_path, sizeof(proc_path), "/proc/%lu/stat", (long)pid);
 
-	char *stat_line = io_readall(proc_path);
+	char *stat_line = io_readline(proc_path);
 	if(!stat_line)
 		return "open /proc/.../stat:";
 
