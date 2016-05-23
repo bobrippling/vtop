@@ -12,18 +12,18 @@ struct process
 	pid_t pid, ppid;
 
 	uid_t uid;
-  gid_t gid;
-  gid_t pgrp;
+	gid_t gid;
+	gid_t pgrp;
 
 	char *unam, *gnam;
 
-  char *tty;
+	char *tty;
 
 	struct argv argv;
 
 	char state;
 
-  signed char nice;
+	signed char nice;
 };
 
 const char *process_init_read(struct process *, pid_t);
