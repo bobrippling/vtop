@@ -64,5 +64,8 @@ try_cflag -Wno-missing-field-initializers
 try_cflag -Wno-missing-braces
 try_cflag -Wno-pointer-to-int-cast
 
+try_cflag -fsanitize=address
+try_cflag -fsanitize=address LDFLAGS_CONFIGURE
+
 try_cflag -g
 try_cflag -g LDFLAGS_CONFIGURE
