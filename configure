@@ -13,7 +13,7 @@ try_cflag(){
 	if $CC "$flag" -c -o /dev/null "$ctmp" >/dev/null 2>&1
 	then
 		echo yes
-		echo "$target += $flag" >> Makefile.cfg
+		echo "$target += $flag" >> config.mk
 		return 0
 	else
 		echo no
@@ -47,11 +47,11 @@ trap "rm -rf '$vtoptmpdir'" EXIT
 
 ctmp="$vtoptmpdir/1.c"
 
-echo > Makefile.cfg
+echo > config.mk
 
-echo "CC = $CC" >> Makefile.cfg
-echo "CFLAGS_CONFIGURE = $CFLAGS" >> Makefile.cfg
-echo "LDFLAGS_CONFIGURE = $LDFLAGS" >> Makefile.cfg
+echo "CC = $CC" >> config.mk
+echo "CFLAGS_CONFIGURE = $CFLAGS" >> config.mk
+echo "LDFLAGS_CONFIGURE = $LDFLAGS" >> config.mk
 
 try_cflag -Wall
 try_cflag -Wextra

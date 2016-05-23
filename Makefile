@@ -29,6 +29,6 @@ clean:
 	$Q${CC} -MM ${CFLAGS} $< > $@
 
 -include ${OBJ:%.o=.%.d}
--include Makefile.cfg
+-include config.mk
 
 .PHONY: all clean

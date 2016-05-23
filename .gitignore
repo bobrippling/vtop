@@ -1,5 +1,5 @@
 *.o
 vtop
-Makefile.cfg
+config.mk
 .*.d
 tags
