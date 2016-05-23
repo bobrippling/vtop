@@ -6,6 +6,8 @@
 #include "nc.h"
 #include "ps.h"
 #include "proc.h"
+#include "ui_pos.h"
+#include "binding.h"
 
 #include "config.h"
 
@@ -14,12 +16,17 @@ typedef struct {
 	time_t last_redraw, last_ps_update;
 	const char *last_ps_err;
 	int exit_code; /* if >= 0, exit */
+	ui_pos pos;
 } ui;
 
 static void handle_input(int ch, ui *ui)
 {
-	if(ch == 'q'){
-		ui->exit_code = 0;
+	/* FIXME: determine based on whole string */
+	for(binding const *i = bindings; i->keys; i++){
+		if(i->keys[0] == ch){
+			i->action(ui->ps, &ui->pos, &ui->exit_code, &i->data);
+			break;
+		}
 	}
 }
 
@@ -28,7 +35,7 @@ static void maybe_redraw(ui *ui)
 	point max = nc_get_screensz();
 	int y = 0;
 
-	for(size_t i = 0; y < max.y - 1; i++){
+	for(size_t i = ui->pos.top; y < max.y - 1; i++){
 		struct process *p = ps_get_index(ui->ps, i);
 		if(!p)
 			break;
