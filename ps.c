@@ -12,10 +12,12 @@
 #include "proc.h"
 #include "io.h"
 
+#define IS_ALIVE(p) (!!(p)->argv.argv)
+
 struct ps
 {
 	struct process *procs; /* TODO: sorted */
-	size_t nprocs, nalloc;
+	size_t nalloc;
 
 	bool use_fallback;
 };
@@ -25,7 +27,6 @@ ps *ps_new()
 	ps *ps = xnew(struct ps);
 
 	ps->procs = NULL;
-	ps->nprocs = 0;
 	ps->nalloc = 0;
 
 	DIR *proc = opendir("/proc");
@@ -38,36 +39,33 @@ ps *ps_new()
 
 void ps_free(ps *ps)
 {
-	for(size_t i = 0; i < ps->nprocs; i++)
+	for(size_t i = 0; i < ps->nalloc; i++)
 		process_free(&ps->procs[i]);
 
 	free(ps->procs);
-
 	free(ps);
 }
 
-struct process *ps_get_index(ps *ps, size_t i)
+struct process *ps_get_index(ps *ps, size_t uidx)
 {
-	if(i >= ps->nprocs)
-		return NULL;
-
-	return &ps->procs[i];
+	for(size_t i = 0; i < ps->nalloc; i++){
+		struct process *p = &ps->procs[i];
+		if(IS_ALIVE(p)){
+			if(uidx == 0)
+				return p;
+			uidx--;
+		}
+	}
+	return NULL;
 }
 
 static struct process *ps_alloc_proc(ps *ps)
 {
-	if(ps->nprocs + 1 > ps->nalloc){
-		ps->nalloc = ps->nprocs + 1;
-		ps->procs = xrealloc(ps->procs, ps->nalloc * sizeof(*ps->procs));
-	}
+	ps->nalloc++;
+	ps->procs = xrealloc(ps->procs, ps->nalloc * sizeof(*ps->procs));
 	struct process *p = &ps->procs[ps->nalloc - 1];
 	memset(p, 0, sizeof(*p));
 	return p;
-}
-
-static void ps_alloc_proc_confirm(ps *ps)
-{
-	ps->nprocs++;
 }
 
 static const char *ps_new_proc_1(ps *ps, pid_t pid)
@@ -76,8 +74,8 @@ static const char *ps_new_proc_1(ps *ps, pid_t pid)
 
 	const char *err = process_init_read(p, pid);
 
-	if(!err)
-		ps_alloc_proc_confirm(ps);
+	if(err)
+		process_free(p);
 
 	return err;
 }
@@ -89,21 +87,11 @@ static const char *ps_update_proc_1(ps *ps, pid_t pid)
 
 static void trim_processes(ps *ps, bool *const currents, size_t orig_nprocs)
 {
-	size_t current_idx = 0;
-
-	for(size_t i = 0; i < orig_nprocs; ){
-		if(currents[current_idx++]){
-			i++;
+	for(size_t i = 0; i < orig_nprocs; i++){
+		if(currents[i])
 			continue;
-		}
 
 		process_free(&ps->procs[i]);
-
-		for(size_t j = i; j < ps->nprocs - 1; j++)
-			ps->procs[j] = ps->procs[j + 1];
-
-		ps->nprocs--;
-		orig_nprocs--;
 	}
 }
 
@@ -185,7 +173,6 @@ static const char *ps_update_fallback(ps *ps, bool *const currents)
 			currents[proc_idx] = true;
 		}else{
 			p = ps_alloc_proc(ps);
-			ps_alloc_proc_confirm(ps);
 		}
 
 		p->pid = pid;
@@ -206,7 +193,7 @@ static const char *ps_update_fallback(ps *ps, bool *const currents)
 
 const char *ps_update(ps *ps)
 {
-	const size_t orig_nprocs = ps->nprocs;
+	const size_t orig_nprocs = ps->nalloc;
 	bool *const currents = xmalloc(orig_nprocs * sizeof(*currents));
 	memset(currents, 0, orig_nprocs * sizeof(*currents));
 
@@ -224,8 +211,8 @@ const char *ps_update(ps *ps)
 
 struct process *ps_get_pid(ps *ps, pid_t pid, size_t *const idx)
 {
-	for(size_t i = 0; i < ps->nprocs; i++){
-		if(ps->procs[i].pid == pid){
+	for(size_t i = 0; i < ps->nalloc; i++){
+		if(IS_ALIVE(&ps->procs[i]) && ps->procs[i].pid == pid){
 			if(idx)
 				*idx = i;
 			return &ps->procs[i];

@@ -114,9 +114,9 @@ const char *process_init_read(struct process *p, pid_t pid)
 
 void process_free(struct process *p)
 {
-	free(p->unam);
-	free(p->gnam);
-	free(p->tty);
+	free(p->unam), p->unam = NULL;
+	free(p->gnam), p->gnam = NULL;
+	free(p->tty), p->tty = NULL;
 	argv_clear(&p->argv);
 }
 
