@@ -93,12 +93,8 @@ static void trim_processes(ps *ps, bool *const currents, size_t orig_nprocs)
 	}
 }
 
-static const char *ps_update_proc(ps *ps)
+static const char *ps_update_proc(ps *ps, bool *const currents)
 {
-	const size_t orig_nprocs = ps->nprocs;
-	bool *currents = xmalloc(orig_nprocs * sizeof(*currents));
-	memset(currents, 0, orig_nprocs * sizeof(*currents));
-
 	DIR *d = opendir("/proc");
 	if(!d)
 		return "can't open procfs";
@@ -135,20 +131,31 @@ ret:;
 	int save = errno;
 	closedir(d);
 
-	trim_processes(ps, currents, orig_nprocs);
-	free(currents);
-
 	errno = save;
 	return ret;
 }
 
+static const char *ps_update_fallback(ps *ps, bool *const currents)
+{
+	return NULL;
+}
+
 const char *ps_update(ps *ps)
 {
+	const size_t orig_nprocs = ps->nprocs;
+	bool *const currents = xmalloc(orig_nprocs * sizeof(*currents));
+	memset(currents, 0, orig_nprocs * sizeof(*currents));
+
 	const char *err;
 	if(ps->use_fallback)
-		return "TODO: fallback";/*ps_update_fallback(ps);*/
+		err = ps_update_fallback(ps, currents);
+	else
+		err = ps_update_proc(ps, currents);
 
-	return ps_update_proc(ps);
+	trim_processes(ps, currents, orig_nprocs);
+	free(currents);
+
+	return err;
 }
 
 struct process *ps_get_pid(ps *ps, pid_t pid, size_t *const idx)
