@@ -155,7 +155,8 @@ struct process *ps_get_pid(ps *ps, pid_t pid, size_t *const idx)
 {
 	for(size_t i = 0; i < ps->nprocs; i++){
 		if(ps->procs[i].pid == pid){
-			*idx = i;
+			if(idx)
+				*idx = i;
 			return &ps->procs[i];
 		}
 	}
