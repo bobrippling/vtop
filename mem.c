@@ -24,6 +24,16 @@ void *xmalloc(size_t l)
 	return p;
 }
 
+void *xcalloc(size_t n, size_t sz)
+{
+	void *p = calloc(n, sz);
+
+	if(!p)
+		alloc_die(n * sz);
+
+	return p;
+}
+
 void *xrealloc(void *p, size_t l)
 {
 	void *r = realloc(p, l);
