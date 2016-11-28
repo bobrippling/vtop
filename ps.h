@@ -18,4 +18,8 @@ attr_wur
 struct process *ps_get_index(ps *, size_t);
 struct process *ps_get_pid(ps *ps, pid_t pid, size_t *const idx);
 
+size_t ps_count(ps *);
+
+pid_t ps_maxpid(ps *);
+
 #endif

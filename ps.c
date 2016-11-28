@@ -222,3 +222,25 @@ struct process *ps_get_pid(ps *ps, pid_t pid, size_t *const idx)
 
 	return NULL;
 }
+
+size_t ps_count(ps *ps)
+{
+	size_t n = 0;
+	for(size_t i = 0; i < ps->nalloc; i++){
+		struct process *p = &ps->procs[i];
+		if(IS_ALIVE(p))
+			n++;
+	}
+	return n;
+}
+
+pid_t ps_maxpid(ps *ps)
+{
+	pid_t max = 0;
+	for(size_t i = 0; i < ps->nalloc; i++){
+		struct process *p = &ps->procs[i];
+		if(IS_ALIVE(p) && p->pid > max)
+			max = p->pid;
+	}
+	return max;
+}
