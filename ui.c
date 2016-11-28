@@ -1,4 +1,5 @@
 #include <time.h>
+#include <math.h>
 #include <sys/time.h>
 
 #include "ui.h"
@@ -8,6 +9,7 @@
 #include "proc.h"
 #include "ui_pos.h"
 #include "binding.h"
+#include "pstree.h"
 
 #include "config.h"
 
@@ -32,22 +34,33 @@ static void handle_input(int ch, ui *ui)
 
 static void maybe_redraw(ui *ui)
 {
+	pstree *tree = pstree_new(ui->ps);
+
 	point max = nc_get_screensz();
 	int y = 0;
+	const unsigned maxpidspace = log10(ps_maxpid(ui->ps)) + 1;
 
 	for(size_t i = ui->pos.top; y < max.y - 1; i++){
-		struct process *p = ps_get_index(ui->ps, i);
+		size_t indent;
+		struct process *p;
+		pstree_get(tree, i, &p, &indent);
 		if(!p)
 			break;
-		if(process_is_kernel(p))
-			continue;
 
 		nc_move((point){ .y = y++ });
 
-		char **argv = p->argv.argv;
+		nc_printf("%*ld ", maxpidspace, p->pid);
+		for(; indent > 0; indent--)
+			nc_printf("  ");
 
-		nc_printf("%ld %s", p->pid, argv ? argv[0] : "?");
+		char **argv = p->argv.argv;
+		nc_printf("%s", argv ? argv[0] : "?");
+
+		nc_clrtoeol();
 	}
+
+	pstree_free(tree);
+	tree = NULL;
 
 	nc_move((point){ .y = y });
 	nc_clrtobot();
