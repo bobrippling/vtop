@@ -1,9 +1,9 @@
-SRC = main.c mem.c nc.c ps.c ui.c proc.c argv.c io.c binding.c
+SRC = main.c mem.c nc.c ps.c ui.c proc.c argv.c io.c binding.c pstree.c
 OBJ = ${SRC:.c=.o}
 DEPS = ${OBJ:%.o=.%.d}
 
 CFLAGS = -std=c99 ${CFLAGS_CONFIGURE}
-LDFLAGS = -lncurses ${LDFLAGS_CONFIGURE}
+LDFLAGS = -lncurses -lm ${LDFLAGS_CONFIGURE}
 
 Q = @
 

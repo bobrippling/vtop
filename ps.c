@@ -61,6 +61,7 @@ struct process *ps_get_index(ps *ps, size_t uidx)
 
 static struct process *ps_alloc_proc(ps *ps)
 {
+	/* TODO: reuse the first !IS_ALIVE() index */
 	ps->nalloc++;
 	ps->procs = xrealloc(ps->procs, ps->nalloc * sizeof(*ps->procs));
 	struct process *p = &ps->procs[ps->nalloc - 1];
