@@ -212,11 +212,15 @@ const char *ps_update(ps *ps)
 
 struct process *ps_get_pid(ps *ps, pid_t pid, size_t *const idx)
 {
+	size_t j = 0;
 	for(size_t i = 0; i < ps->nalloc; i++){
-		if(IS_ALIVE(&ps->procs[i]) && ps->procs[i].pid == pid){
-			if(idx)
-				*idx = i;
-			return &ps->procs[i];
+		if(IS_ALIVE(&ps->procs[i])){
+			if(ps->procs[i].pid == pid){
+				if(idx)
+					*idx = j;
+				return &ps->procs[i];
+			}
+			j++;
 		}
 	}
 
