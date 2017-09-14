@@ -1,5 +1,7 @@
 #include "binding.h"
 
+#define STATUS_LINES 1
+
 void action_quit(
 		ps *ps,
 		ui_pos *const pos,
@@ -22,7 +24,7 @@ void action_cursor_move(
 	if(pos->y < 0)
 		pos->y = 0;
 
-	pos->top = clamp(pos->top, pos->y - frame->y + 1, pos->y);
+	pos->top = clamp(pos->top, pos->y - frame->y + 1 + STATUS_LINES, pos->y);
 }
 
 void action_page_move(
@@ -32,13 +34,13 @@ void action_page_move(
 		int *const exit_code,
 		union binding_data const *data)
 {
-	pos->top += data->dir.top * frame->y / 2;
+	pos->top += data->dir.top * (frame->y - STATUS_LINES) / 2;
 
 	if(pos->top < 0)
 		pos->top = 0;
 
-	if(pos->y - pos->top >= frame->y)
-		pos->y = pos->top + frame->y - 1;
+	if(pos->y - pos->top >= frame->y - STATUS_LINES)
+		pos->y = pos->top + frame->y - STATUS_LINES - 1;
 	else if(pos->y < pos->top)
 		pos->y = pos->top;
 }
@@ -56,10 +58,10 @@ void action_cursor_page(
 		case -1:
 			break;
 		case 0:
-			pos->y += frame->y / 2;
+			pos->y += (frame->y - STATUS_LINES) / 2;
 			break;
 		case +1:
-			pos->y += frame->y - 1;
+			pos->y += frame->y - STATUS_LINES - 1;
 			break;
 	}
 }
