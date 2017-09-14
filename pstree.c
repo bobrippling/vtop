@@ -21,16 +21,16 @@ struct pstree
 {
 	struct tree_entry *entries;
 	struct tree_entry **roots;
-	size_t nroots;
+	size_t nentries, nroots;
 };
 
 pstree *pstree_new(struct ps *ps)
 {
-	const size_t n = ps_count(ps);
 	pstree *tree = xmalloc(sizeof *tree);
 
 	memset(tree, 0, sizeof(*tree));
-	tree->entries = xcalloc(n, sizeof(*tree->entries));
+	tree->nentries = ps_count(ps);
+	tree->entries = xcalloc(tree->nentries, sizeof(*tree->entries));
 
 	struct process *p;
 	size_t i;
@@ -51,7 +51,7 @@ pstree *pstree_new(struct ps *ps)
 			tree->roots[tree->nroots - 1] = &tree->entries[i];
 		}
 	}
-	assert(i == n);
+	assert(i == tree->nentries);
 
 	return tree;
 }
