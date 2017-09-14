@@ -1,4 +1,4 @@
-SRC = main.c mem.c nc.c ps.c ui.c proc.c argv.c io.c binding.c pstree.c
+SRC = main.c mem.c nc.c ps.c ui.c ui_pos.c proc.c argv.c io.c binding.c pstree.c
 OBJ = ${SRC:.c=.o}
 DEPS = ${OBJ:%.o=.%.d}
 

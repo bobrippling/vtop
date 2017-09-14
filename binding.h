@@ -2,6 +2,7 @@
 #define BINDING_H
 
 #include "ui_pos.h"
+#include "point.h"
 #include "ps.h"
 
 union binding_data
@@ -13,6 +14,7 @@ union binding_data
 typedef void binding_action(
 		ps *,
 		ui_pos *const,
+		point const *frame,
 		int *const exit_code /*-1*/,
 		union binding_data const *);
 
@@ -26,5 +28,7 @@ typedef struct binding
 
 binding_action action_quit;
 binding_action action_cursor_move;
+binding_action action_page_move;
+binding_action action_cursor_page;
 
 #endif

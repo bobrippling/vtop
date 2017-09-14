@@ -19,6 +19,7 @@ typedef struct {
 	const char *last_ps_err;
 	int exit_code; /* if >= 0, exit */
 	ui_pos pos;
+	point frame;
 } ui;
 
 static void handle_input(int ch, ui *ui)
@@ -26,7 +27,7 @@ static void handle_input(int ch, ui *ui)
 	/* FIXME: determine based on whole string */
 	for(binding const *i = bindings; i->keys; i++){
 		if(i->keys[0] == ch){
-			i->action(ui->ps, &ui->pos, &ui->exit_code, &i->data);
+			i->action(ui->ps, &ui->pos, &ui->frame, &ui->exit_code, &i->data);
 			break;
 		}
 	}
@@ -36,11 +37,11 @@ static void maybe_redraw(ui *ui)
 {
 	pstree *tree = pstree_new(ui->ps);
 
-	point max = nc_get_screensz();
+	ui->frame = nc_get_screensz();
 	int y = 0;
 	const unsigned maxpidspace = log10(ps_maxpid(ui->ps)) + 1;
 
-	for(size_t i = ui->pos.top; y < max.y - 1; i++){
+	for(size_t i = ui->pos.top; y < ui->frame.y - 1; i++){
 		size_t indent;
 		struct process *p;
 		pstree_get(tree, i, &p, &indent);
@@ -67,9 +68,11 @@ static void maybe_redraw(ui *ui)
 
 	const char *msg = ui->last_ps_err;
 	if(msg){
-		nc_move((point){ .y = max.y - 1 });
+		nc_move((point){ .y = ui->frame.y - 1 });
 		nc_printf("%s", msg);
 	}
+
+	nc_move((point){ .y = ui->pos.y - ui->pos.top });
 }
 
 static void maybe_update_ps(ui *ui)
