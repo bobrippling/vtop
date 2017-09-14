@@ -89,6 +89,11 @@ void pstree_get(pstree *tree, size_t i, struct process **const p, size_t *const 
 
 void pstree_free(pstree *tree)
 {
+	for(size_t i = 0; i < tree->nentries; i++){
+		struct tree_entry *ent = &tree->entries[i];
+		free(ent->children);
+	}
+
 	free(tree->entries);
 	free(tree->roots);
 	free(tree);
