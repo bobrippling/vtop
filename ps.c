@@ -14,6 +14,10 @@
 
 #define IS_ALIVE(p) (!!(p)->argv.argv)
 
+#define ps_iter_alive(p, ps)               \
+	for(size_t i = 0; i < (ps)->nalloc; i++) \
+		if(p = &(ps)->procs[i], IS_ALIVE(p))
+
 struct ps
 {
 	struct process *procs; /* TODO: sorted */
@@ -48,13 +52,11 @@ void ps_free(ps *ps)
 
 struct process *ps_get_index(ps *ps, size_t uidx)
 {
-	for(size_t i = 0; i < ps->nalloc; i++){
-		struct process *p = &ps->procs[i];
-		if(IS_ALIVE(p)){
-			if(uidx == 0)
-				return p;
-			uidx--;
-		}
+	struct process *p;
+	ps_iter_alive(p, ps){
+		if(uidx == 0)
+			return p;
+		uidx--;
 	}
 	return NULL;
 }
@@ -213,15 +215,14 @@ const char *ps_update(ps *ps)
 struct process *ps_get_pid(ps *ps, pid_t pid, size_t *const idx)
 {
 	size_t j = 0;
-	for(size_t i = 0; i < ps->nalloc; i++){
-		if(IS_ALIVE(&ps->procs[i])){
-			if(ps->procs[i].pid == pid){
-				if(idx)
-					*idx = j;
-				return &ps->procs[i];
-			}
-			j++;
+	struct process *p;
+	ps_iter_alive(p, ps){
+		if(p->pid == pid){
+			if(idx)
+				*idx = j;
+			return p;
 		}
+		j++;
 	}
 
 	return NULL;
@@ -230,21 +231,22 @@ struct process *ps_get_pid(ps *ps, pid_t pid, size_t *const idx)
 size_t ps_count(ps *ps)
 {
 	size_t n = 0;
-	for(size_t i = 0; i < ps->nalloc; i++){
-		struct process *p = &ps->procs[i];
-		if(IS_ALIVE(p))
-			n++;
-	}
+
+	struct process *p;
+	ps_iter_alive(p, ps)
+		n++;
+
 	return n;
 }
 
 pid_t ps_maxpid(ps *ps)
 {
 	pid_t max = 0;
-	for(size_t i = 0; i < ps->nalloc; i++){
-		struct process *p = &ps->procs[i];
-		if(IS_ALIVE(p) && p->pid > max)
+
+	struct process *p;
+	ps_iter_alive(p, ps)
+		if(p->pid > max)
 			max = p->pid;
-	}
+
 	return max;
 }
