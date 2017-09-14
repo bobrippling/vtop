@@ -41,7 +41,7 @@ static void maybe_redraw(ui *ui)
 	int y = 0;
 	const unsigned maxpidspace = log10(ps_maxpid(ui->ps)) + 1;
 
-	for(size_t i = ui->pos.top; y < ui->frame.y - 1; i++){
+	for(size_t i = ui->pos.top; y < ui->frame.y - STATUS_LINES; i++){
 		size_t indent;
 		struct process *p;
 		pstree_get(tree, i, &p, &indent);

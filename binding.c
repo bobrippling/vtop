@@ -1,6 +1,5 @@
 #include "binding.h"
-
-#define STATUS_LINES 1
+#include "config.h"
 
 void action_quit(
 		ps *ps,
