@@ -41,6 +41,17 @@ static void append_ch(char **const unhandled_input, int ch)
 	(*unhandled_input)[l] = '\0';
 }
 
+static size_t initial_matching_len(const char *full, const char *substr)
+{
+	size_t l = 0;
+	while(*full && *substr && *full == *substr){
+		l++;
+		full++;
+		substr++;
+	}
+	return l;
+}
+
 static void handle_input(int ch, ui *ui)
 {
 	if(ch == KEY_ESC){
@@ -50,15 +61,27 @@ static void handle_input(int ch, ui *ui)
 	}
 
 	append_ch(&ui->unhandled_input, ch);
+	const size_t inputlen = strlen(ui->unhandled_input);
+	bool potential = false;
 
 	for(binding const *i = bindings; i->keys; i++){
-		if(!strcmp(i->keys, ui->unhandled_input)){
+		size_t match = initial_matching_len(i->keys, ui->unhandled_input);
+		size_t keyslen = strlen(i->keys);
+
+		if(match == keyslen){
 			free(ui->unhandled_input);
 			ui->unhandled_input = NULL;
 
 			i->action(ui->ps, &ui->pos, &ui->frame, &ui->exit_code, &i->data);
 			break;
+		}else if(inputlen < keyslen){
+			potential = true;
 		}
+	}
+
+	if(!potential){
+		free(ui->unhandled_input);
+		ui->unhandled_input = NULL;
 	}
 }
 
