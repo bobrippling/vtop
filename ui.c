@@ -1,9 +1,13 @@
+#include <stdlib.h>
+#include <string.h>
+
 #include <time.h>
 #include <math.h>
 #include <sys/time.h>
 
 #include "ui.h"
 
+#include "mem.h"
 #include "nc.h"
 #include "ps.h"
 #include "proc.h"
@@ -17,16 +21,35 @@ typedef struct {
 	ps *ps;
 	time_t last_redraw, last_ps_update;
 	const char *last_ps_err;
+	char *unhandled_input;
 	int exit_code; /* if >= 0, exit */
 	ui_pos pos;
 	point frame;
 } ui;
 
+static void append_ch(char **const unhandled_input, int ch)
+{
+	size_t l;
+	if(*unhandled_input)
+		l = strlen(*unhandled_input);
+	else
+		l = 0;
+
+	l++;
+	*unhandled_input = xrealloc(*unhandled_input, l + 1);
+	(*unhandled_input)[l - 1] = ch;
+	(*unhandled_input)[l] = '\0';
+}
+
 static void handle_input(int ch, ui *ui)
 {
-	/* FIXME: determine based on whole string */
+	append_ch(&ui->unhandled_input, ch);
+
 	for(binding const *i = bindings; i->keys; i++){
-		if(i->keys[0] == ch){
+		if(!strcmp(i->keys, ui->unhandled_input)){
+			free(ui->unhandled_input);
+			ui->unhandled_input = NULL;
+
 			i->action(ui->ps, &ui->pos, &ui->frame, &ui->exit_code, &i->data);
 			break;
 		}
