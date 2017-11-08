@@ -44,6 +44,21 @@ void action_page_move(
 		pos->y = pos->top;
 }
 
+void action_page_scroll(
+		ps *ps,
+		ui_pos *const pos,
+		const point *frame,
+		int *const exit_code,
+		union binding_data const *data)
+{
+	pos->top += data->dir.top;
+
+	if(pos->top < 0)
+		pos->top = 0;
+
+	pos->y = clamp(pos->y, pos->top, pos->top + frame->y - 1 - STATUS_LINES);
+}
+
 void action_cursor_page(
 		ps *ps,
 		ui_pos *const pos,

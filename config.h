@@ -11,6 +11,9 @@ static const binding bindings[] = {
 	{ "j", action_cursor_move, .data.dir.y = +1 },
 	{ "k", action_cursor_move, .data.dir.y = -1 },
 
+	{ (char []){ CTRL_AND('e'), '\0' }, action_page_scroll, .data.dir.top = +1 },
+	{ (char []){ CTRL_AND('y'), '\0' }, action_page_scroll, .data.dir.top = -1 },
+
 	{ (char []){ CTRL_AND('f'), '\0' }, action_page_move, .data.dir.top = +2 },
 	{ (char []){ CTRL_AND('b'), '\0' }, action_page_move, .data.dir.top = -2 },
 	{ (char []){ CTRL_AND('d'), '\0' }, action_page_move, .data.dir.top = +1 },
