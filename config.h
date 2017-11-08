@@ -3,6 +3,7 @@
 
 #define CONFIG_KEY_TIMEOUT_SECONDS 0.5
 #define CTRL_AND(c) ((c) & 037)
+#define KEY_ESC CTRL_AND('[')
 
 #define STATUS_LINES 1
 

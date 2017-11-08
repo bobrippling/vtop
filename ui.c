@@ -43,6 +43,12 @@ static void append_ch(char **const unhandled_input, int ch)
 
 static void handle_input(int ch, ui *ui)
 {
+	if(ch == KEY_ESC){
+		free(ui->unhandled_input);
+		ui->unhandled_input = NULL;
+		return;
+	}
+
 	append_ch(&ui->unhandled_input, ch);
 
 	for(binding const *i = bindings; i->keys; i++){
