@@ -102,7 +102,7 @@ static void maybe_redraw(ui *ui)
 
 		nc_move((point){ .y = y++ });
 
-		nc_printf("%*ld ", maxpidspace, p->pid);
+		nc_printf("%*ld ", maxpidspace, (long)p->pid);
 		for(; indent > 0; indent--)
 			nc_printf("  ");
 
