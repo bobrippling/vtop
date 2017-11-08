@@ -23,6 +23,9 @@ static const binding bindings[] = {
 	{ "M", action_cursor_page, .data.dir.y =  0 },
 	{ "L", action_cursor_page, .data.dir.y = +1 },
 
+	{ "gg", action_cursor_goto, .data.dir.y = -1 },
+	{ "G", action_cursor_goto, .data.dir.y = 1 },
+
 	{ 0 },
 };
 

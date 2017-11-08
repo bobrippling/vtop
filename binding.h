@@ -31,5 +31,6 @@ binding_action action_cursor_move;
 binding_action action_page_move;
 binding_action action_cursor_page;
 binding_action action_page_scroll;
+binding_action action_cursor_goto;
 
 #endif

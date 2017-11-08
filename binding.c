@@ -1,6 +1,11 @@
 #include "binding.h"
 #include "config.h"
 
+static void clamp_pos_top(ui_pos *const pos, const point *const frame)
+{
+	pos->top = clamp(pos->top, pos->y - frame->y + 1 + STATUS_LINES, pos->y);
+}
+
 void action_quit(
 		ps *ps,
 		ui_pos *const pos,
@@ -23,7 +28,21 @@ void action_cursor_move(
 	if(pos->y < 0)
 		pos->y = 0;
 
-	pos->top = clamp(pos->top, pos->y - frame->y + 1 + STATUS_LINES, pos->y);
+	clamp_pos_top(pos, frame);
+}
+
+void action_cursor_goto(
+		ps *ps,
+		ui_pos *const pos,
+		const point *frame,
+		int *const exit_code,
+		union binding_data const *data)
+{
+	pos->y = data->dir.y <= 0 ? 0 : ps_count(ps) - 1;
+	if(pos->y < 0)
+		pos->y = 0;
+
+	clamp_pos_top(pos, frame);
 }
 
 void action_page_move(
