@@ -24,6 +24,24 @@ struct pstree
 	size_t nentries, nroots;
 };
 
+static int tree_entry_cmp(const void *va, const void *vb)
+{
+	const struct tree_entry *a = va, *b = vb;
+
+	return a->p->pid - b->p->pid;
+}
+
+static void pstree_sort(struct tree_entry **ents, size_t nents)
+{
+	if(!ents)
+		return;
+
+	for(size_t i = 0; i < nents; i++)
+		pstree_sort(ents[i]->children, ents[i]->nchildren);
+
+	qsort(ents, nents, sizeof(*ents), tree_entry_cmp);
+}
+
 pstree *pstree_new(struct ps *ps)
 {
 	pstree *tree = xmalloc(sizeof *tree);
@@ -52,6 +70,8 @@ pstree *pstree_new(struct ps *ps)
 		}
 	}
 	assert(i == tree->nentries);
+
+	pstree_sort(tree->roots, tree->nroots);
 
 	return tree;
 }
