@@ -97,10 +97,14 @@ static void maybe_redraw(ui *ui)
 		size_t indent;
 		struct process *p;
 		pstree_get(tree, i, &p, &indent);
-		if(!p)
-			break;
 
 		nc_move((point){ .y = y++ });
+
+		if(!p){
+			nc_printf("~");
+			nc_clrtoeol();
+			continue;
+		}
 
 		nc_printf("%*ld ", maxpidspace, (long)p->pid);
 		for(; indent > 0; indent--)
