@@ -11,12 +11,17 @@ union binding_data
 	ui_pos dir;
 };
 
+struct configurable_state
+{
+	ui_pos pos;
+	int exit_code; /* if >= 0, exit */
+};
+
 typedef void binding_action(
 		ps *,
-		ui_pos *const,
 		point const *frame,
-		int *const exit_code /*-1*/,
-		union binding_data const *);
+		union binding_data const *,
+		struct configurable_state *state);
 
 typedef struct binding
 {

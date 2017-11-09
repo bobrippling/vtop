@@ -8,93 +8,87 @@ static void clamp_pos_top(ui_pos *const pos, const point *const frame)
 
 void action_quit(
 		ps *ps,
-		ui_pos *const pos,
 		const point *frame,
-		int *const exit_code,
-		union binding_data const *data)
+		union binding_data const *data,
+		struct configurable_state *state)
 {
-	*exit_code = data->i;
+	state->exit_code = data->i;
 }
 
 void action_cursor_move(
 		ps *ps,
-		ui_pos *const pos,
 		const point *frame,
-		int *const exit_code,
-		union binding_data const *data)
+		union binding_data const *data,
+		struct configurable_state *state)
 {
-	pos->y += data->dir.y;
+	state->pos.y += data->dir.y;
 
-	if(pos->y < 0)
-		pos->y = 0;
+	if(state->pos.y < 0)
+		state->pos.y = 0;
 
-	clamp_pos_top(pos, frame);
+	clamp_pos_top(&state->pos, frame);
 }
 
 void action_cursor_goto(
 		ps *ps,
-		ui_pos *const pos,
 		const point *frame,
-		int *const exit_code,
-		union binding_data const *data)
+		union binding_data const *data,
+		struct configurable_state *state)
 {
-	pos->y = data->dir.y <= 0 ? 0 : ps_count(ps) - 1;
-	if(pos->y < 0)
-		pos->y = 0;
+	state->pos.y = data->dir.y <= 0 ? 0 : ps_count(ps) - 1;
+	if(state->pos.y < 0)
+		state->pos.y = 0;
 
-	clamp_pos_top(pos, frame);
+	clamp_pos_top(&state->pos, frame);
 }
 
 void action_page_move(
 		ps *ps,
-		ui_pos *const pos,
 		const point *frame,
-		int *const exit_code,
-		union binding_data const *data)
+		union binding_data const *data,
+		struct configurable_state *state)
 {
-	pos->top += data->dir.top * (frame->y - STATUS_LINES) / 2;
+	state->pos.top += data->dir.top * (frame->y - STATUS_LINES) / 2;
 
-	if(pos->top < 0)
-		pos->top = 0;
+	if(state->pos.top < 0)
+		state->pos.top = 0;
 
-	if(pos->y - pos->top >= frame->y - STATUS_LINES)
-		pos->y = pos->top + frame->y - STATUS_LINES - 1;
-	else if(pos->y < pos->top)
-		pos->y = pos->top;
+	if(state->pos.y - state->pos.top >= frame->y - STATUS_LINES)
+		state->pos.y = state->pos.top + frame->y - STATUS_LINES - 1;
+	else if(state->pos.y < state->pos.top)
+		state->pos.y = state->pos.top;
 }
 
 void action_page_scroll(
 		ps *ps,
-		ui_pos *const pos,
 		const point *frame,
-		int *const exit_code,
-		union binding_data const *data)
+		union binding_data const *data,
+		struct configurable_state *state)
 {
-	pos->top += data->dir.top;
+	state->pos.top += data->dir.top;
 
-	if(pos->top < 0)
-		pos->top = 0;
+	if(state->pos.top < 0)
+		state->pos.top = 0;
 
-	pos->y = clamp(pos->y, pos->top, pos->top + frame->y - 1 - STATUS_LINES);
+	state->pos.y = clamp(state->pos.y, state->pos.top, state->pos.top + frame->y - 1 - STATUS_LINES);
 }
 
 void action_cursor_page(
 		ps *ps,
-		ui_pos *const pos,
 		const point *frame,
-		int *const exit_code,
-		union binding_data const *data)
+		union binding_data const *data,
+		struct configurable_state *state)
 {
-	pos->y = pos->top;
+	state->pos.y = state->pos.top;
 
 	switch(data->dir.y){
 		case -1:
 			break;
 		case 0:
-			pos->y += (frame->y - STATUS_LINES) / 2;
+			state->pos.y += (frame->y - STATUS_LINES) / 2;
 			break;
 		case +1:
-			pos->y += frame->y - STATUS_LINES - 1;
+			state->pos.y += frame->y - STATUS_LINES - 1;
 			break;
 	}
 }

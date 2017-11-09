@@ -22,9 +22,8 @@ typedef struct {
 	time_t last_redraw, last_ps_update;
 	const char *last_ps_err;
 	char *unhandled_input;
-	int exit_code; /* if >= 0, exit */
-	ui_pos pos;
 	point frame;
+	struct configurable_state state;
 } ui;
 
 static void append_ch(char **const unhandled_input, int ch)
@@ -72,7 +71,7 @@ static void handle_input(int ch, ui *ui)
 			free(ui->unhandled_input);
 			ui->unhandled_input = NULL;
 
-			i->action(ui->ps, &ui->pos, &ui->frame, &ui->exit_code, &i->data);
+			i->action(ui->ps, &ui->frame, &i->data, &ui->state);
 			break;
 		}else if(inputlen < keyslen){
 			potential = true;
@@ -93,7 +92,7 @@ static void maybe_redraw(ui *ui)
 	int y = 0;
 	const unsigned maxpidspace = log10(ps_maxpid(ui->ps)) + 1;
 
-	for(size_t i = ui->pos.top; y < ui->frame.y - STATUS_LINES; i++){
+	for(size_t i = ui->state.pos.top; y < ui->frame.y - STATUS_LINES; i++){
 		size_t indent;
 		struct process *p;
 		pstree_get(tree, i, &p, &indent);
@@ -128,7 +127,7 @@ static void maybe_redraw(ui *ui)
 		nc_printf("%s", msg);
 	}
 
-	nc_move((point){ .y = ui->pos.y - ui->pos.top });
+	nc_move((point){ .y = ui->state.pos.y - ui->state.pos.top });
 }
 
 static void maybe_update_ps(ui *ui)
@@ -154,19 +153,19 @@ static void ui_main_1(ui *ui)
 
 int ui_main(void)
 {
-	ui ui = { .ps = ps_new(), .exit_code = -1 };
+	ui ui = { .ps = ps_new(), .state.exit_code = -1 };
 
 	ui.last_redraw = ui.last_ps_update = time(NULL) - 2;
 
 	for(;;){
 		ui_main_1(&ui);
-		if(ui.exit_code >= 0)
+		if(ui.state.exit_code >= 0)
 			break;
 	}
 
 	ps_free(ui.ps);
 
-	return ui.exit_code;
+	return ui.state.exit_code;
 }
 
 void ui_init(void)
