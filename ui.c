@@ -132,6 +132,9 @@ static void maybe_redraw(ui *ui)
 
 static void maybe_update_ps(ui *ui)
 {
+	if(ui->state.frozen)
+		return;
+
 	time_t now = time(NULL);
 
 	if(ui->last_ps_update + 1 < now){

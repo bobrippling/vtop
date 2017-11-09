@@ -27,6 +27,8 @@ static const binding bindings[] = {
 	{ "gg", action_cursor_goto, .data.dir.y = -1 },
 	{ "G", action_cursor_goto, .data.dir.y = 1 },
 
+	{ "f", action_freeze },
+
 	{ 0 },
 };
 

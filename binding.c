@@ -92,3 +92,12 @@ void action_cursor_page(
 			break;
 	}
 }
+
+void action_freeze(
+		ps *ps,
+		const point *frame,
+		union binding_data const *data,
+		struct configurable_state *state)
+{
+	state->frozen ^= 1;
+}
